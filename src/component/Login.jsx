@@ -106,32 +106,39 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import img from "../../public/logo.png";
-
 export default function Login() {
   const [role, setRole] = useState("Student");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+ const handleLogin = (e) => {
+  e.preventDefault();
 
-    // Save token/session
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+
+  if (
+    storedUser &&
+    storedUser.email === email &&
+    storedUser.password === password
+  ) {
     localStorage.setItem("authToken", "loggedIn");
-    localStorage.setItem("role", role); // Save role
+    localStorage.setItem("role", storedUser.role);
 
-    // Role-based redirect
-    if (role === "Student") {
+    if (storedUser.role === "Student") {
       navigate("/student-dashboard");
-    } else if (role === "Admin") {
+    } else {
       navigate("/admin-dashboard");
     }
-  };
+  } else {
+    alert("Invalid Credentials!");
+  }
+};
 
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-230 h-130 bg-white rounded-2xl shadow-lg overflow-hidden grid grid-cols-2">
         {/* Left Side */}
-        <div className="relative bg--to-br from-green-50 to-green-200 p-10 flex flex-col justify-center">
+        <div className="relative bg-linear-to-br from-green-50 to-green-200 p-10 flex flex-col justify-center">
           <div>
             <h1 className="text-2xl font-bold text-green-700 mb-6">
               <img src={img} alt="Logo" className="w-30 h-10 inline-block mr-2" />
@@ -158,27 +165,19 @@ export default function Login() {
             </h3>
 
             <form className="space-y-4" onSubmit={handleLogin}>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  required
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
+              <input
+  type="email"
+  required
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+/>
 
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  required
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
+<input
+  type="password"
+  required
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+/>
 
               {/* Role Toggle */}
               <div className="flex bg-gray-100 rounded-md overflow-hidden">
@@ -204,6 +203,16 @@ export default function Login() {
               >
                 Log in
               </button>
+
+              <p className="text-sm text-center mt-3">
+  Don't have an account?{" "}
+  <span
+    className="text-blue-600 cursor-pointer"
+    onClick={() => navigate("/signup")}
+  >
+    Sign Up
+  </span>
+</p>
             </form>
           </div>
         </div>
