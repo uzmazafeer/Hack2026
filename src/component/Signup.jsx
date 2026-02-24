@@ -1,5 +1,6 @@
- import React, { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+// import { supabase } from "../auth/config";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ export default function Signup() {
     role: "Student",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -18,14 +21,27 @@ export default function Signup() {
     });
   };
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    // Save user data in localStorage
-    localStorage.setItem("user", JSON.stringify(formData));
+    const { error } = await supabase.from("table2026").insert([
+      {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+      },
+    ]);
 
-    alert("Signup Successful! Please Login.");
-    navigate("/"); // Redirect to login page
+    setLoading(false);
+
+    if (error) {
+      alert(error.message);
+    } else {
+      alert("Signup Successful! Please Login.");
+      navigate("/");
+    }
   };
 
   return (
@@ -66,7 +82,6 @@ export default function Signup() {
             className="w-full px-3 py-2 border rounded-md"
           />
 
-          {/* Role Selection */}
           <select
             name="role"
             value={formData.role}
@@ -79,9 +94,10 @@ export default function Signup() {
 
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md"
           >
-            Sign Up
+            {loading ? "Creating Account..." : "Sign Up"}
           </button>
         </form>
 
